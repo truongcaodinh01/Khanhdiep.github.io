@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tool Phân Tích - Tài Xỉu & Lô Đề👾🔰</title>
+  <!-- Sử dụng Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #0f0f0f;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+    /* Card-style cho từng phần */
+    .card {
+      background: #1e1e1e;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+    }
+    h2 {
+      margin-top: 0;
+      color: #00e0ff;
+    }
+    .input-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .input-group input, .input-group select {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background: #2e2e2e;
+      color: #fff;
+    }
+    button {
+      padding: 12px 20px;
+      margin: 10px 5px;
+      border: none;
+      border-radius: 5px;
+      background: linear-gradient(225deg, #ff3cac 0%, #562b7c 52%, #2b86c5 100%);
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #3a2a63;
+    }
+    .mode-selector, .nav-section {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .nav-section button {
+      margin: 0 10px;
+    }
+    .visible {
+      display: block !important;
+    }
+    .hidden {
+      display: none;
+    }
+    /* Responsive */
+    @media (max-width: 600px) {
+      button {
+        width: 100%;
+        margin: 5px 0;
+      }
+    }
+    /* Canvas cho hiệu ứng tiền rơi */
+    #moneyCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background music -->
+  <audio id="bgmusic" autoplay loop>
+    <source src="https://cdn.tainhac123.com/listen/2023/09/07/dang-cay-tuoi-doi-muoi-vu-duy-khanh-2023.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="container">
+    <!-- Bước 1: Nhập License Key -->
+    <div id="step1" class="card">
+      <h2>Nhập License Key</h2>
+      <div class="input-group">
+        <label for="licenseKey">License Key:</label>
+        <input type="text" id="licenseKey" placeholder="Nhập License Key của bạn⚠️">
+      </div>
+      <button onclick="validateLicense()">Xác nhận License</button>
+    </div>
+
+    <!-- Bước 2: Chọn chế độ (Tài Xỉu hoặc Lô Đề) -->
+    <div id="step2" class="card hidden">
+      <h2>Chọn Chế Độ Phân Tích</h2>
+      <div class="mode-selector">
+        <button onclick="showMode('taixiu')">Tài Xỉu</button>
+        <button onclick="showMode('lode')">Lô Đề</button>
+      </div>
+      <!-- Phần cổng game cho Tài Xỉu -->
+      <div id="taixiuSection" class="card hidden">
+        <h2>Phân Tích Tài Xỉu🔱</h2>
+        <div class="input-group">
+          <label for="game">Chọn cổng game❇️:</label>
+          <select id="game">
+            <option>Sunwin⚜️</option>
+            <option>B52🛑</option>
+            <option>Rikvip🔗</option>
+            <option>789🪄</option>
+            <option>Hitclub🧸</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="customGame">Hoặc nhập tên/link game bạn chơi nếu không có💡:</label>
+          <input type="text" id="customGame" placeholder="Nhập tên hoặc link game🔮">
+        </div>
+        <div class="input-group">
+          <label for="md5">Nhập mã MD5:</label>
+          <input type="text" id="md5" placeholder="Nhập mã MD5 để phân tích Tài Xỉu">
+        </div>
+        <button onclick="analyzeTaixiu()">Phân tích Tài Xỉu🩸</button>
+        <div id="resultMD5"></div>
+      </div>
+      <!-- Phần phân tích Lô Đề -->
+      <div id="lodeSection" class="card hidden">
+        <h2>Phân Tích Lô Đề⚙️</h2>
+        <div class="input-group">
+          <label for="region">Chọn miền💎:</label>
+          <select id="region">
+            <option>Miền Bắc📈</option>
+            <option>Miền Nam📉</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="lotteryInput">Nhập các số Lô:</label>
+          <input type="text" id="lotteryInput" placeholder="VD: 123456">
+        </div>
+        <button onclick="analyzeLottery()">Phân tích Lô📩</button>
+        <div id="resultLottery"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Canvas hiệu ứng tiền rơi -->
+  <canvas id="moneyCanvas"></canvas>
+
+  <script>
+    // ----------------------------
+    // Phần xử lý License Key (Cryptolens)
+    // ----------------------------
+    const productId = 29668;
+    const accessToken = 'WyIxMDY2Nzc2MDAiLCIwR2ovTzROUlF5U3h2V0llK3BoQ1UwUHlLL2V6c1RhYnBOYWNqTm1kIl0=';
+
+    function validateLicense() {
+      const key = document.getElementById('licenseKey').value.trim();
+      if (!key) {
+        alert("Vui lòng nhập License Key!");
+        return;
+      }
+      fetch(`https://api.cryptolens.io/api/key/Activate?token=${accessToken}&ProductId=${productId}&Key=${key}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.result === 0) {
+            alert("License Key hợp lệ! Chuyển sang bước tiếp theo.");
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+          } else {
+            alert("License Key không hợp lệ🪓!");
+          }
+        })
+        .catch(err => {
+          alert("Lỗi kết nối, vui lòng thử lại sau!");
+          console.error(err);
+        });
+    }
+
+    // ----------------------------
+    // Chuyển đổi giữa chế độ Tài Xỉu và Lô Đề
+    // ----------------------------
+    function showMode(mode) {
+      if (mode === 'taixiu') {
+        document.getElementById('taixiuSection').classList.remove('hidden');
+        document.getElementById('lodeSection').classList.add('hidden');
+      } else if (mode === 'lode') {
+        document.getElementById('lodeSection').classList.remove('hidden');
+        document.getElementById('taixiuSection').classList.add('hidden');
+      }
+    }
+
+    // ----------------------------
+    // Phân tích Tài Xỉu (MD5 - SICBO)
+    // ----------------------------
+    function analyzeTaixiu() {
+      const md5 = document.getElementById('md5').value.trim();
+      if (md5.length < 24) {
+        alert("Mã MD5 không hợp lệ!");
+        return;
+      }
+      // Hiển thị thông báo phân tích
+      const resultDiv = document.getElementById('resultMD5');
+      resultDiv.innerHTML = "BOT ĐANG PHÂN TÍCH MD5...";
+      setTimeout(() => {
+        // Chia mã MD5 thành 3 phần, mỗi phần cho một viên xúc xắc
+        const parts = [md5.slice(0, 8), md5.slice(8, 16), md5.slice(16, 24)];
+        const nums = parts.map(p => parseInt(p, 16) % 6 + 1);
+        const total = nums.reduce((a, b) => a + b, 0);
+        const result = total >= 11 ? "TÀI" : "XỈU";
+        let percentTai = result === "TÀI" ? 75 + Math.random() * 10 : 20 + Math.random() * 10;
+        let percentXiu = 100 - percentTai;
+        percentTai = percentTai.toFixed(1);
+        percentXiu = percentXiu.toFixed(1);
+        let khuyenCao = '';
+        if (percentTai >= 75) khuyenCao = 'TÀI TO - NÊN MẠNH TAY !!!';
+        else if (percentXiu >= 75) khuyenCao = 'XỈU TO - ÔM HẾT VỐN ĐI !!!';
+        else khuyenCao = 'Phân vân - Cân nhắc trước khi all-in.';
+        resultDiv.innerHTML = `
+          <div style="padding: 20px; border: 2px solid #00f7ff; border-radius: 10px; background: rgba(0,0,0,0.6);">
+            <h2 style="color: ${result === "TÀI" ? '#0f0' : '#f00'};">KẾT QUẢ: ${result}</h2>
+            <p style="font-size: 18px;">Số xúc xắc: <b>${nums.join(' - ')}</b> | Tổng: <b>${total}</b></p>
+            <p style="font-size: 18px;">TÀI: <span style="color:#0f0">${percentTai}%</span> | XỈU: <span style="color:#f00">${percentXiu}%</span></p>
+            <p style="margin-top:10px; color: #ffcc00; font-weight: bold;">Khuyến cáo: ${khuyenCao}</p>
+          </div>
+        `;
+        startHeavyRain();
+      }, 2000);
+    }
+
+    // ----------------------------
+    // Phân tích Lô Đề
+    // ----------------------------
+    function analyzeLottery() {
+      const lottery = document.getElementById('lotteryInput').value.trim();
+      if (!/^\d+$/.test(lottery)) {
+        alert("Vui lòng chỉ nhập các số cho Lô!");
+        return;
+      }
+      const resultDiv = document.getElementById('resultLottery');
+      resultDiv.innerHTML = "BOT ĐANG PHÂN TÍCH LÔ...";
+      setTimeout(() => {
+        let sum = 0;
+        for (const digit of lottery) { sum += parseInt(digit); }
+        const lastDigit = parseInt(lottery.slice(-1));
+        const result = (lastDigit % 2 === 0) ? "Lô CHẴN" : "Lô LẺ";
+        const percent = result === "Lô CHẴN" ? (70 + Math.random() * 20).toFixed(1) : (30 + Math.random() * 20).toFixed(1);
+        const advice = result === "Lô CHẴN" ? "Chọn lô chẵn, hợp may!" : "Chọn lô lẻ, hãy cẩn trọng!";
+        resultDiv.innerHTML = `
+          <div style="padding: 20px; border: 2px solid #00f7ff; border-radius: 10px; background: rgba(0,0,0,0.6);">
+            <h2 style="color: ${result === "Lô CHẴN" ? '#0f0' : '#f00'};">KẾT QUẢ: ${result}</h2>
+            <p style="font-size: 18px;">Tổng các chữ số: ${sum}</p>
+            <p style="font-size: 18px;">Phần trăm may mắn: ${percent}%</p>
+            <p style="margin-top:10px; color: #ffcc00; font-weight: bold;">Khuyến cáo: ${advice}</p>
+          </div>
+        `;
+      }, 2000);
+    }
+
+    // ----------------------------
+    // Hiệu ứng tiền rơi (Canvas)
+    // ----------------------------
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    
+    let symbols = [];
+    function createSymbols(count) {
+      for (let i = 0; i < count; i++) {
+        symbols.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          speed: 1 + Math.random() * 3,
+          fontSize: 14 + Math.random() * 20
+        });
+      }
+    }
+    function drawSymbols() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#00ff00';
+      symbols.forEach(s => {
+        ctx.font = `bold ${s.fontSize}px Arial`;
+        ctx.fillText('$', s.x, s.y);
+        s.y += s.speed;
+        if (s.y > canvas.height) {
+          s.y = -20;
+          s.x = Math.random() * canvas.width;
+        }
+      });
+      requestAnimationFrame(drawSymbols);
+    }
+    function startLightRain() {
+      symbols = [];
+      createSymbols(30);
+      drawSymbols();
+    }
+    function startHeavyRain() {
+      symbols = [];
+      createSymbols(150);
+    }
+    startLightRain();
+  </script>
+</body>
+</html>
